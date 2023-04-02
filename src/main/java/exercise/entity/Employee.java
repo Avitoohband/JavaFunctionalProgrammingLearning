@@ -1,6 +1,7 @@
 package exercise.entity;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public record Employee(String name, int age, double salary, String jobTitle) {
@@ -31,11 +32,12 @@ public record Employee(String name, int age, double salary, String jobTitle) {
 
 
 
-    public void displayDetails() {
-        System.out.println("Name: " + name);
-        System.out.println("Age: " + age);
-        System.out.println(String.format("Salary:  $%,.2f", salary));
-        System.out.println("Job Title: " + jobTitle);
+    @Override
+    public String toString() {
+        return "Name: " + name + "\n" +
+                "Age: " + age + "\n" +
+                "Salary: " + String.format("%,.2f", salary) + "\n" +
+                "Job Title: " + jobTitle + "\n";
     }
 
     @Override
@@ -74,10 +76,7 @@ public record Employee(String name, int age, double salary, String jobTitle) {
     }
 
     public static void printEmployees(List<Employee> employeeList) {
-        employeeList.forEach(employee -> {
-            employee.displayDetails();
-            System.out.println();
-        });
+        employeeList.forEach(System.out::println);
     }
 
 
@@ -103,10 +102,26 @@ public record Employee(String name, int age, double salary, String jobTitle) {
         return resultMap;
     }
 
-    public static void printSoftwareEngineers(Map<String, List<Employee>> groupedEmployees) {
-        System.out.println("Software Engineers:");
+    public static Map<String, List<Employee>> groupByJobTitleStream(List<Employee> employeeList){
+        return employeeList.stream()
+                .collect(Collectors.groupingBy(Employee::jobTitle));
+    }
+
+    public static double calculateAverage (List<Employee> employeeList){
+        return employeeList.stream()
+                .mapToDouble(Employee::salary)
+                .average()
+                .orElse(0.0);
+    }
+
+    public static void printAverageSalary (List<Employee> employeeList){
+        System.out.printf("Average Salary: $%,.2f%n",calculateAverage(employeeList));
+    }
+
+    public static void printEmployeesByTitle(Map<String, List<Employee>> groupedEmployees, String title) {
+        System.out.println(title + ":");
         groupedEmployees.entrySet().stream()
-                .filter(e -> e.getKey().equals("Software Engineer"))
+                .filter(e -> e.getKey().equals(title))
                 .forEach(e -> Employee.printEmployees(e.getValue()));
     }
 
