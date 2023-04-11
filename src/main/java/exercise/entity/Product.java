@@ -1,7 +1,7 @@
 package exercise.entity;
 
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public record Product(Long id, String name, String category, Double price) {
@@ -18,28 +18,88 @@ public record Product(Long id, String name, String category, Double price) {
     }
 
     public static void generateProducts(List<Product> productList) {
-        Stream.generate(() -> new Product(
-                current_id++,
-                getRandomProductName(),
-                getRandomCategory(),
-                generateRandomPrice())
-        ).limit(100).forEach(productList::add);
+        Map<String, List<String>> categoriesAndProducts = getCategoriesAndProducts();
+
+        IntStream.range(0, 100)
+                .mapToObj(i -> getRandomProductName(categoriesAndProducts))
+                .forEach(randomProductName -> {
+                    String productCategoryName = getProductCategoryName(categoriesAndProducts, randomProductName);
+                    productList.add(
+                            new Product(
+                                    current_id++,
+                                    randomProductName,
+                                    productCategoryName,
+                                    generateRandomPrice()));
+                });
+    }
+
+
+    private static Map<String, List<String>> getCategoriesAndProducts() {
+        Map<String, List<String>> categoriesAndProducts = new HashMap<>();
+
+        // Add products to the map for "Electronics" category
+        addProductToMap(categoriesAndProducts, "Electronics", "DVD", "TV", "Microwave", "Oven",
+                "Refrigerator", "Fan", "PC", "Sony", "Stereo", "Monitor");
+
+        // Add products to the map for "Books" category
+        addProductToMap(categoriesAndProducts, "Books", "Harry Potter", "Lord of the Rings",
+                "To Kill a Mockingbird", "1984", "The Great Gatsby", "Pride and Prejudice",
+                "The Catcher in the Rye", "Brave New World");
+
+        addProductToMap(categoriesAndProducts, "Baby", "Diapers", "Baby Formula", "Baby Food",
+                "Baby Clothes", "Baby Stroller", "Baby Car Seat", "Baby Monitor", "Baby Toys");
+
+        addProductToMap(categoriesAndProducts, "Toys", "Action Figure", "Doll", "Board Game",
+                "Building Blocks", "Remote Control Car", "Puzzle", "Art Set",
+                "Plush Toy", "Musical Instrument", "Outdoor Toy");
+
+        return categoriesAndProducts;
+    }
+
+    private static void addProductToMap(Map<String, List<String>> categoriesAndProducts, String category, String... productNames) {
+        // If category is not already present in the map, add an empty list for it
+        categoriesAndProducts.putIfAbsent(category, new ArrayList<>());
+
+        // Add the product names to the list of products for the given category
+        categoriesAndProducts.get(category).addAll(List.of(productNames));
     }
 
     private static Double generateRandomPrice() {
-        return new Random().nextDouble() * 50_000 + 1_000;
+        double randomPrice = new Random().nextDouble() * 150 + 10;
+        String formattedPriceString = String.format("%,.2f", randomPrice);
+        return Double.valueOf(formattedPriceString);
     }
 
-    private static String getRandomCategory() {
-        String[] categoryNames = {"Electricity", "Super Electricity", "Low Electricity", "Fulled", "Space Ship"};
-        return categoryNames[new Random().nextInt(categoryNames.length)];
+    private static String getRandomProductName(Map<String, List<String>> categoriesAndProducts) {
+        // Get a random category from the product map
+        String randomCategory = getRandomCategory(categoriesAndProducts);
+
+        // Get the list of product names for the random category
+        List<String> productNames = categoriesAndProducts.get(randomCategory);
+
+        // Get a random product name from the list
+        return productNames.get(new Random().nextInt(productNames.size()));
     }
 
-    private static String getRandomProductName() {
+    private static String getRandomCategory(Map<String, List<String>> categoriesAndProducts) {
+        // Get a random category key from the product map
+        List<String> categories = new ArrayList<>(categoriesAndProducts.keySet());
+        return categories.get(new Random().nextInt(categories.size()));
+    }
 
-        String[] productNames = {"DVD", "TV", "Microwave", "Oven", "Refrigerator", "Fan", "PC", "Sony", "Stereo", "Monitor"};
-        return productNames[new Random().nextInt(productNames.length)];
+    private static String getProductCategoryName(Map<String, List<String>> categoriesAndProducts, String randomProductName) {
+        return categoriesAndProducts
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().contains(randomProductName))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse("General");
 
+    }
 
+    public Product withPrice(double newPrice) {
+        return new Product(id, name, category, newPrice);
     }
 }
+

@@ -25,20 +25,12 @@ public record Order(Long id, String status, LocalDate orderDate, LocalDate deliv
     public static void generateOrders(List<Order> orderList, List<Product> productList, List<Customer> customerList) {
         Random random = new Random();
         String[] statusList = {"Ordered" , "Confirmed", "Received" , "Canceled"};
-        LocalDate orderDate = LocalDate.now();
-        LocalDate deliveryDate = LocalDate.now().plusDays(7);
-
-        orderDate = generateOrderDate();
-        deliveryDate = generateDeliveryDate(orderDate);
-        LocalDate finalOrderDate = orderDate;
-        LocalDate finalDeliveryDate = deliveryDate;
-
 
         Stream.generate(() -> new Order(
                 current_id++,
                 statusList[new Random().nextInt(statusList.length)],
-                finalOrderDate,
-                finalDeliveryDate,
+                generateOrderDate(),
+                generateDeliveryDate(generateOrderDate()),
                 getRandomProductList(productList),
                 getRanodmCustomer(customerList)))
                 .limit(100)
