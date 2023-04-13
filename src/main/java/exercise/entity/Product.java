@@ -56,6 +56,14 @@ public record Product(Long id, String name, String category, Double price) {
         return categoriesAndProducts;
     }
 
+    public static Product applyTenPercent(Product p) {
+        return p.withPrice(Product.formatPrice((p.price() * 0.9)));
+    }
+
+    public static Boolean isBooksCategoryAndOver100(Product product) {
+        return "Books".equalsIgnoreCase(product.category()) && (Objects.nonNull(product.price()) && product.price() > 100);
+    }
+
     private static void addProductToMap(Map<String, List<String>> categoriesAndProducts, String category, String... productNames) {
         // If category is not already present in the map, add an empty list for it
         categoriesAndProducts.putIfAbsent(category, new ArrayList<>());
@@ -66,7 +74,11 @@ public record Product(Long id, String name, String category, Double price) {
 
     private static Double generateRandomPrice() {
         double randomPrice = new Random().nextDouble() * 150 + 10;
-        String formattedPriceString = String.format("%,.2f", randomPrice);
+        return formatPrice(randomPrice);
+    }
+
+    public static Double formatPrice(Double price){
+        String formattedPriceString = String.format("%.2f", price);
         return Double.valueOf(formattedPriceString);
     }
 

@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public record Order(Long id, String status, LocalDate orderDate, LocalDate deliveryDate, List<Product> productList,
-                    Customer customer) {
+public record Order(Long id, String status, LocalDate orderDate, LocalDate deliveryDate,
+                    List<Product> productList, Customer customer) {
 
     public static Long current_id = 0L;
 
@@ -56,6 +56,6 @@ public record Order(Long id, String status, LocalDate orderDate, LocalDate deliv
     }
 
     private static LocalDate generateOrderDate() {
-        return LocalDate.now().minusDays(new Random().nextInt(7));
+        return LocalDate.now().minusDays(new Random().nextInt(14));
     }
 }
